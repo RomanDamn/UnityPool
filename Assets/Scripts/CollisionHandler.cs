@@ -2,20 +2,23 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Renderer))]
+[RequireComponent(typeof(Renderer), typeof(Cube))]
 public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] private string _collisionTag = "Collision";
 
+	private int _minSecondsToDissapear = 2;
+	private int _maxSecondsToDissapear = 6;
+
 	private bool _hasCollision = false;
 
-    public event Action<GameObject> Died;
+    public event Action<Cube> Died;
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == _collisionTag && !_hasCollision)
         {
-			int secondsToDissapear = UnityEngine.Random.Range(2, 6);
+			int secondsToDissapear = UnityEngine.Random.Range(_minSecondsToDissapear, _maxSecondsToDissapear);
 			ToggleCollision();
 			ChangeColor();
 			StartCoroutine(Dissapear(secondsToDissapear));
@@ -25,8 +28,10 @@ public class CollisionHandler : MonoBehaviour
     private IEnumerator Dissapear(int secondsToDissapear)
     {
         yield return new WaitForSeconds(secondsToDissapear);
+
 		ToggleCollision();
-		Died?.Invoke(gameObject);
+		var cube = GetComponent<Cube>();
+		Died?.Invoke(cube);
 	}
 
 	private void ToggleCollision()
